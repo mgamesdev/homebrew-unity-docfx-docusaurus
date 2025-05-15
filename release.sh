@@ -12,9 +12,9 @@ fi
 
 VERSION=$1
 TAG="v$VERSION"
-SCRIPT_NAME="docfx-unity-docusaurus.sh"
-FORMULA_FILE="docfx-unity-docusaurus.rb"
-TAP_REPO="homebrew-docfx-unity-docusaurus"
+SCRIPT_NAME="unity-docfx-docusaurus.sh"
+FORMULA_FILE="Formula/unity-docfx-docusaurus.rb"
+TAP_REPO="homebrew-unity-docfx-docusaurus"
 
 # Check if Ruby is installed
 if ! command -v ruby &> /dev/null; then

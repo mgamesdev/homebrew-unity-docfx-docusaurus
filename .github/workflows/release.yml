@@ -47,6 +47,6 @@ jobs:
           cp ../docfx-unity-docusaurus.rb Formula/
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
-          git add Formula/docfx-unity-docusaurus.rb
+          git add Formula/unity-docfx-docusaurus.rb
           git commit -m "Update formula to ${{ github.ref }}"
           git push 
