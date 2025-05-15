@@ -1,0 +1,52 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.0'
+          bundler-cache: true
+
+      - name: Create release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+
+      - name: Calculate SHA256
+        id: sha256
+        run: |
+          SHA256=$(shasum -a 256 docfx-unity-docusaurus.sh | awk '{print $1}')
+          echo "::set-output name=sha256::$SHA256"
+
+      - name: Update Homebrew formula
+        run: |
+          sed -i '' "s/sha256 \".*\"/sha256 \"${{ steps.sha256.outputs.sha256 }}\"/" docfx-unity-docusaurus.rb
+          sed -i '' "s|url \".*\"|url \"${{ steps.create_release.outputs.upload_url }}\"|" docfx-unity-docusaurus.rb
+
+      - name: Create tap repository
+        run: |
+          git clone https://${{ secrets.GITHUB_TOKEN }}@github.com/yourusername/homebrew-docfx-unity-docusaurus.git
+          cd homebrew-docfx-unity-docusaurus
+          cp ../docfx-unity-docusaurus.rb Formula/
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git add Formula/docfx-unity-docusaurus.rb
+          git commit -m "Update formula to ${{ github.ref }}"
+          git push 
