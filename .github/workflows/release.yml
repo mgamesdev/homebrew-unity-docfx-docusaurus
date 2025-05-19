@@ -45,6 +45,7 @@ jobs:
           repository: mgamesdev/homebrew-unity-docfx-docusaurus
           token: ${{ secrets.GITHUB_TOKEN }}
           path: homebrew-tap
+          ref: main  # explicitly checkout the main branch
 
       - name: Create Formula directory
         run: mkdir -p homebrew-tap/Formula
@@ -75,5 +76,12 @@ jobs:
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
           git add Formula/
-          git diff --staged --quiet || git commit -m "Update formula for ${{ github.ref }}"
-          git push 
+          
+          # Only commit if there are changes
+          if ! git diff --staged --quiet; then
+            git commit -m "Update formula for ${{ github.ref }}"
+            # Push explicitly to the main branch
+            git push origin HEAD:main
+          else
+            echo "No changes to commit"
+          fi 
