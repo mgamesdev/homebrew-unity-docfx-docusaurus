@@ -46,9 +46,15 @@ jobs:
 
       - name: Create tap repository
         run: |
-          # Clone using public URL
-          if ! git clone https://github.com/mgamesdev/homebrew-unity-docfx-docusaurus.git; then
-            echo "Failed to clone tap repository. Please ensure the repository exists at https://github.com/mgamesdev/homebrew-unity-docfx-docusaurus"
+          # Setup SSH
+          mkdir -p ~/.ssh
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
+          
+          # Clone using SSH
+          if ! git clone git@github.com:mgamesdev/homebrew-unity-docfx-docusaurus.git; then
+            echo "Failed to clone tap repository. Please ensure:"
+            echo "1. The repository exists at https://github.com/mgamesdev/homebrew-unity-docfx-docusaurus"
+            echo "2. The repository is accessible via SSH"
             exit 1
           fi
           
@@ -59,9 +65,10 @@ jobs:
           git add Formula/unity-docfx-docusaurus.rb
           git commit -m "Update formula to ${{ github.ref }}"
           
-          # Use token only for push
+          # Use token for push
           if [ -z "${{ secrets.GITHUB_TOKEN }}" ]; then
             echo "Error: GITHUB_TOKEN is not available"
             exit 1
           fi
-          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/mgamesdev/homebrew-unity-docfx-docusaurus.git 
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/mgamesdev/homebrew-unity-docfx-docusaurus.git
+          git push origin HEAD 
