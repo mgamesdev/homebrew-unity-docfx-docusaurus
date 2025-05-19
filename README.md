@@ -12,33 +12,43 @@ A command-line tool that generates DocFX documentation from Unity packages and c
 
 ## Installation
 
-### Using Homebrew (macOS)
+### Using Homebrew (macOS & Linux)
+
+You can install Unity DocFX Docusaurus using Homebrew:
 
 ```bash
-# Add the tap (if using a custom tap)
-brew tap yourusername/docfx-unity-docusaurus
+# Add the tap repository
+brew tap mgamesdev/unity-docfx-docusaurus
 
 # Install the tool
-brew install docfx-unity-docusaurus
+brew install unity-docfx-docusaurus
 ```
 
 ### Manual Installation
 
-1. Clone this repository:
-   ```bash
-   git clone https://github.com/yourusername/docfx-unity-docusaurus.git
-   cd docfx-unity-docusaurus
-   ```
+Clone this repository:
 
-2. Make the script executable:
-   ```bash
-   chmod +x docfx-unity-docusaurus.sh
-   ```
+```bash
+git clone https://github.com/mgamesdev/unity-docfx-docusaurus.git
+cd unity-docfx-docusaurus
+```
 
-3. Move the script to a directory in your PATH:
-   ```bash
-   sudo mv docfx-unity-docusaurus.sh /usr/local/bin/docfx-unity-docusaurus
-   ```
+Make the script executable:
+
+```bash
+chmod +x docfx-unity-docusaurus.sh
+```
+
+Optionally, create a symbolic link to make it available system-wide:
+
+```bash
+sudo ln -s "$(pwd)/docfx-unity-docusaurus.sh" /usr/local/bin/unity-docfx-docusaurus
+```
+
+### Prerequisites
+
+- [DocFX](https://dotnet.github.io/docfx/)
+- [Node.js](https://nodejs.org/)
 
 ## Requirements
 
