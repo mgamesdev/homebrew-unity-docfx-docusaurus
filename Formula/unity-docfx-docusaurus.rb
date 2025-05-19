@@ -1,9 +1,13 @@
 class UnityDocfxDocusaurus < Formula
   desc 'Generate DocFX documentation from Unity packages and convert to Docusaurus format'
-  homepage 'https://github.com/mgamesdev/unity-docfx-docusaurus.git'
-  url 'https://github.com/mgamesdev/unity-docfx-docusaurus/archive/refs/tags/v1.0.0.tar.gz'
-  sha256 'YOUR_SHA256_HASH' # Replace with actual SHA256 hash after creating the release
+  homepage 'https://github.com/mgamesdev/unity-docfx-docusaurus'
+  url 'https://github.com/mgamesdev/unity-docfx-docusaurus/archive/refs/tags/v1.0.0.tar.gz' # This will be updated by the workflow
+  sha256 '7bbac0e84510570ec' # This will be updated by the workflow
   license 'MIT'
+
+  # Add a comment to help maintainers understand the URL format
+  # The URL will be updated by the GitHub Actions workflow to match the current release tag
+  # Example: v1.0.0 -> https://github.com/mgamesdev/unity-docfx-docusaurus/archive/refs/tags/v1.0.0.tar.gz
 
   depends_on 'dotnet'
   depends_on 'python@3'

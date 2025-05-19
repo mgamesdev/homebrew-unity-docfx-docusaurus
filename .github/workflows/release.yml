@@ -41,34 +41,41 @@ jobs:
 
       - name: Update Homebrew formula
         run: |
+          # Extract version from tag (remove 'v' prefix)
+          # Example: refs/tags/v1.0.0 -> 1.0.0
+          VERSION=${GITHUB_REF#refs/tags/v}
+          
+          # Construct the release URL
+          # Example: 1.0.0 -> https://github.com/mgamesdev/unity-docfx-docusaurus/archive/refs/tags/v1.0.0.tar.gz
+          RELEASE_URL="https://github.com/mgamesdev/unity-docfx-docusaurus/archive/refs/tags/v${VERSION}.tar.gz"
+          
+          echo "Updating formula with:"
+          echo "Version: ${VERSION}"
+          echo "URL: ${RELEASE_URL}"
+          echo "SHA256: ${{ steps.sha256.outputs.sha256 }}"
+          
+          # Update the formula with the new URL and SHA256
+          sed -i '' "s|url \".*\"|url \"${RELEASE_URL}\"|" Formula/unity-docfx-docusaurus.rb
           sed -i '' "s/sha256 \".*\"/sha256 \"${{ steps.sha256.outputs.sha256 }}\"/" Formula/unity-docfx-docusaurus.rb
-          sed -i '' "s|url \".*\"|url \"${{ steps.create_release.outputs.upload_url }}\"|" Formula/unity-docfx-docusaurus.rb
 
       - name: Create tap repository
         run: |
-          # Setup SSH
-          mkdir -p ~/.ssh
-          ssh-keyscan github.com >> ~/.ssh/known_hosts
-          
-          # Clone using SSH
-          if ! git clone git@github.com:mgamesdev/homebrew-unity-docfx-docusaurus.git; then
-            echo "Failed to clone tap repository. Please ensure:"
-            echo "1. The repository exists at https://github.com/mgamesdev/homebrew-unity-docfx-docusaurus"
-            echo "2. The repository is accessible via SSH"
+          # Clone using public URL
+          if ! git clone https://github.com/mgamesdev/homebrew-unity-docfx-docusaurus.git; then
+            echo "Failed to clone tap repository. Please ensure the repository exists at https://github.com/mgamesdev/homebrew-unity-docfx-docusaurus"
             exit 1
           fi
           
           cd homebrew-unity-docfx-docusaurus
-          cp ../docfx-unity-docfx-docusaurus.sh Formula/
+          cp ../docfx-unity-docusaurus.sh Formula/
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
           git add Formula/unity-docfx-docusaurus.rb
           git commit -m "Update formula to ${{ github.ref }}"
           
-          # Use token for push
+          # Use token only for push
           if [ -z "${{ secrets.GITHUB_TOKEN }}" ]; then
             echo "Error: GITHUB_TOKEN is not available"
             exit 1
           fi
-          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/mgamesdev/homebrew-unity-docfx-docusaurus.git
-          git push origin HEAD 
+          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/mgamesdev/homebrew-unity-docfx-docusaurus.git 
