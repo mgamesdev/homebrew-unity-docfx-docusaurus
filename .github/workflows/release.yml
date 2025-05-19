@@ -16,6 +16,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Debug environment
+        run: |
+          echo "Current working directory: $(pwd)"
+          echo "GitHub ref: ${{ github.ref }}"
+          echo "Files in current directory:"
+          ls -la
+          echo "Formula directory exists: $(test -d Formula && echo 'Yes' || echo 'No')"
+
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
@@ -36,7 +44,14 @@ jobs:
       - name: Calculate SHA256
         id: sha256
         run: |
+          echo "Calculating SHA256 for script file..."
+          if [ ! -f docfx-unity-docusaurus.sh ]; then
+            echo "ERROR: Script file not found!"
+            ls -la
+            exit 1
+          fi
           SHA256=$(shasum -a 256 docfx-unity-docusaurus.sh | awk '{print $1}')
+          echo "SHA256 value: $SHA256"
           echo "sha256=$SHA256" >> $GITHUB_OUTPUT
 
       - name: Checkout tap repository
@@ -47,11 +62,31 @@ jobs:
           path: homebrew-tap
           ref: main  # explicitly checkout the main branch
 
+      - name: Debug tap repository
+        run: |
+          echo "Tap repository directory structure:"
+          ls -la homebrew-tap
+          echo "Current branch of tap repository:"
+          cd homebrew-tap && git branch -a
+
       - name: Create Formula directory
-        run: mkdir -p homebrew-tap/Formula
+        run: |
+          echo "Creating Formula directory..."
+          mkdir -p homebrew-tap/Formula
+          echo "Formula directory created. Contents:"
+          ls -la homebrew-tap/Formula
 
       - name: Copy script to tap
-        run: cp docfx-unity-docusaurus.sh homebrew-tap/Formula/
+        run: |
+          echo "Copying script to tap..."
+          if [ ! -f docfx-unity-docusaurus.sh ]; then
+            echo "ERROR: Script file not found at expected location!"
+            ls -la
+            exit 1
+          fi
+          cp docfx-unity-docusaurus.sh homebrew-tap/Formula/
+          echo "Script copied. Contents of Formula directory:"
+          ls -la homebrew-tap/Formula
 
       - name: Copy and update formula
         env:
@@ -59,29 +94,60 @@ jobs:
         run: |
           # Extract version from tag (remove 'v' prefix)
           VERSION=${GITHUB_REF#refs/tags/v}
+          echo "Extracted version: $VERSION"
           
           # Construct the release URL
           RELEASE_URL="https://github.com/mgamesdev/unity-docfx-docusaurus/archive/refs/tags/v${VERSION}.tar.gz"
+          echo "Constructed release URL: $RELEASE_URL"
           
-          # Copy the formula template
+          # Check if formula template exists
+          if [ ! -f Formula/unity-docfx-docusaurus.rb ]; then
+            echo "ERROR: Formula template not found at Formula/unity-docfx-docusaurus.rb"
+            echo "Contents of current directory:"
+            ls -la
+            echo "Contents of Formula directory (if exists):"
+            ls -la Formula || echo "Formula directory does not exist"
+            exit 1
+          fi
+          
+          echo "Copying formula template..."
           cp Formula/unity-docfx-docusaurus.rb homebrew-tap/Formula/
           
-          # Update the placeholders
-          sed -i '' "s|RELEASE_URL_PLACEHOLDER|$RELEASE_URL|" homebrew-tap/Formula/unity-docfx-docusaurus.rb
-          sed -i '' "s|SHA256_PLACEHOLDER|$SHA256|" homebrew-tap/Formula/unity-docfx-docusaurus.rb
+          echo "Updating placeholders..."
+          echo "SHA256 value being used: $SHA256"
+          
+          # Update the placeholders with verbose error checking
+          sed -i '' "s|RELEASE_URL_PLACEHOLDER|$RELEASE_URL|" homebrew-tap/Formula/unity-docfx-docusaurus.rb || { echo "Error updating RELEASE_URL"; exit 1; }
+          sed -i '' "s|SHA256_PLACEHOLDER|$SHA256|" homebrew-tap/Formula/unity-docfx-docusaurus.rb || { echo "Error updating SHA256"; exit 1; }
+          
+          echo "Formula updated. Contents:"
+          cat homebrew-tap/Formula/unity-docfx-docusaurus.rb
 
       - name: Commit and push changes
         run: |
           cd homebrew-tap
+          echo "Configuring git..."
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
+          
+          echo "Adding files to git..."
           git add Formula/
           
-          # Only commit if there are changes
+          echo "Checking for changes..."
           if ! git diff --staged --quiet; then
+            echo "Changes detected, committing..."
             git commit -m "Update formula for ${{ github.ref }}"
-            # Push explicitly to the main branch
-            git push origin HEAD:main
+            
+            echo "Pushing to main branch..."
+            git push origin HEAD:main || { 
+              echo "ERROR: Push failed! Getting more details..."
+              git remote -v
+              git branch
+              git status
+              exit 1
+            }
+            
+            echo "Successfully pushed changes!"
           else
-            echo "No changes to commit"
+            echo "No changes detected, nothing to commit"
           fi 
