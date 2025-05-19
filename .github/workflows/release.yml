@@ -67,10 +67,28 @@ jobs:
           fi
           
           cd homebrew-unity-docfx-docusaurus
+          
+          # Create Formula directory if it doesn't exist
+          mkdir -p Formula
+          
+          # Copy the formula and script
+          cp ../Formula/unity-docfx-docusaurus.rb Formula/
           cp ../docfx-unity-docusaurus.sh Formula/
+          
+          # Configure git
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
-          git add Formula/unity-docfx-docusaurus.rb
+          
+          # Add all files in Formula directory
+          git add Formula/
+          
+          # Check if there are any changes to commit
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          
+          # Commit and push
           git commit -m "Update formula to ${{ github.ref }}"
           
           # Use token only for push
