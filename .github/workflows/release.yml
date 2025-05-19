@@ -41,14 +41,14 @@ jobs:
 
       - name: Update Homebrew formula
         run: |
-          sed -i '' "s/sha256 \".*\"/sha256 \"${{ steps.sha256.outputs.sha256 }}\"/" docfx-unity-docusaurus.rb
-          sed -i '' "s|url \".*\"|url \"${{ steps.create_release.outputs.upload_url }}\"|" docfx-unity-docusaurus.rb
+          sed -i '' "s/sha256 \".*\"/sha256 \"${{ steps.sha256.outputs.sha256 }}\"/" Formula/unity-docfx-docusaurus.rb
+          sed -i '' "s|url \".*\"|url \"${{ steps.create_release.outputs.upload_url }}\"|" Formula/unity-docfx-docusaurus.rb
 
       - name: Create tap repository
         run: |
           git clone https://${{ secrets.GITHUB_TOKEN }}@github.com/mgamesdev/homebrew-unity-docfx-docusaurus.git
           cd homebrew-unity-docfx-docusaurus
-          cp ../docfx-unity-docusaurus.rb Formula/
+          cp ../docfx-unity-docusaurus.sh Formula/
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
           git add Formula/unity-docfx-docusaurus.rb

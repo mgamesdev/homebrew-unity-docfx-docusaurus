@@ -12,7 +12,7 @@ fi
 
 VERSION=$1
 TAG="v$VERSION"
-SCRIPT_NAME="unity-docfx-docusaurus.sh"
+SCRIPT_NAME="docfx-unity-docusaurus.sh"
 FORMULA_FILE="Formula/unity-docfx-docusaurus.rb"
 TAP_REPO="homebrew-unity-docfx-docusaurus"
 
@@ -53,3 +53,4 @@ echo "Next steps:"
 echo "1. Create a release on GitHub manually"
 echo "2. Update the formula URL with the release URL"
 echo "3. Push the formula to your Homebrew tap repository" 
+echo "4. Published the repository to Homebrew"
